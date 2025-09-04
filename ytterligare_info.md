@@ -51,5 +51,9 @@ const typeDefs = /* GraphQL */ `
     type Mutation {
         updateBook....
     }
+    # Och vi kan såklart använda ex. Book i andra typer så ex.
+    type BookStore {
+        books: [Book!]!
+    }
 `;
 ```
