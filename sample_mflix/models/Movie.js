@@ -11,6 +11,6 @@ const MovieSchema = new mongoose.Schema(
 		directors: [String],
 		imdb: { rating: Number, votes: Number, id: Number },
 	},
-	{ collection: "sample_mflix" }
+	{ collection: "movies" }
 );
 export const Movie = mongoose.model("Movie", MovieSchema);

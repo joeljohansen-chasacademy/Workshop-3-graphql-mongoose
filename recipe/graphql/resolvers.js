@@ -4,42 +4,107 @@ import mongoose from "mongoose";
 export const resolvers = {
 	Query: {
 		recipes: async (_p, { title, diet, maxTimeMin, limit }) => {
-			// TODO:
-			// 1) bygg filter = {}
-			//    - om title: filter.title = { $regex: title, $options: "i" }
-			//    - om diet: filter.diet = diet
-			//    - om maxTimeMin: använd $expr med ($add: ["$prepTimeMin","$cookTimeMin"]) <= maxTimeMin
-			//       -> kräver aggregate ELLER klient-beräkning. För enkelhet: gör aggregate.
-			// 2) sortera t.ex. { createdAt: -1 }, applicera limit
-			return [];
+			const lim = typeof limit === "number" ? limit : 20;
+
+			if (typeof maxTimeMin === "number") {
+				const match = {};
+				if (title) match.title = { $regex: title, $options: "i" };
+				if (diet) match.diet = diet;
+
+				//Vi kan tyvärr inte nå totalTimeMin härifrån, det räknas ut efter att vi har hämtat dokumenten.
+				const pipeline = [
+					{ $match: match },
+					{
+						$match: {
+							$expr: {
+								$lte: [{ $add: ["$prepTimeMin", "$cookTimeMin"] }, maxTimeMin],
+							},
+						},
+					},
+					{ $sort: { createdAt: -1 } },
+					{ $limit: limit },
+				];
+
+				const docs = await Recipe.aggregate(pipeline).exec();
+				return docs;
+			}
+
+			const filter = {};
+			if (title) filter.title = { $regex: title, $options: "i" };
+			if (diet) filter.diet = diet;
+
+			return Recipe.find(filter).sort({ createdAt: -1 }).limit(lim).exec();
 		},
 
 		recipe: async (_p, { id }) => {
-			// TODO: validera ObjectId, findById
-			return null;
+			if (!mongoose.Types.ObjectId.isValid(id)) return null;
+			return Recipe.findById(id).exec();
 		},
 	},
 
 	Mutation: {
 		createRecipe: async (_p, { input }) => {
-			// TODO: skapa nytt recept (createdAt = new Date().toISOString())
-			// return saved doc
-			return null;
+			const doc = new Recipe({ ...input, createdAt: new Date() });
+			await doc.save();
+			return doc;
 		},
 
-		//updateRecipe
-		//deleteRecipe
-		//addIngredient
-		//updateIngredient
-		//removeIngredient
+		updateRecipe: async (_p, { id, input }) => {
+			if (!mongoose.Types.ObjectId.isValid(id)) return null;
+			return Recipe.findByIdAndUpdate(id, input, { new: true }).exec();
+		},
+
+		deleteRecipe: async (_p, { id }) => {
+			if (!mongoose.Types.ObjectId.isValid(id)) return false;
+			const res = await Recipe.findByIdAndDelete(id).exec();
+			return !!res;
+		},
+
+		addIngredient: async (_p, { recipeId, ingredient }) => {
+			if (!mongoose.Types.ObjectId.isValid(recipeId)) return null;
+			return Recipe.findByIdAndUpdate(
+				recipeId,
+				{ $push: { ingredients: ingredient } },
+				{ new: true }
+			).exec();
+		},
+
+		updateIngredient: async (_p, { recipeId, index, ingredient }) => {
+			if (!mongoose.Types.ObjectId.isValid(recipeId)) return null;
+			const doc = await Recipe.findById(recipeId).exec();
+			if (!doc) return null;
+			if (
+				!Array.isArray(doc.ingredients) ||
+				index < 0 ||
+				index >= doc.ingredients.length
+			) {
+				return null;
+			}
+			doc.ingredients[index] = ingredient;
+			await doc.save();
+			return doc;
+		},
+
+		removeIngredient: async (_p, { recipeId, index }) => {
+			if (!mongoose.Types.ObjectId.isValid(recipeId)) return null;
+			const doc = await Recipe.findById(recipeId).exec();
+			if (!doc) return null;
+			if (
+				!Array.isArray(doc.ingredients) ||
+				index < 0 ||
+				index >= doc.ingredients.length
+			) {
+				return null;
+			}
+			doc.ingredients.splice(index, 1);
+			await doc.save();
+			return doc;
+		},
 	},
 
 	Recipe: {
 		id: (doc) => doc.id,
-		totalTimeMin: (doc) => {
-			//console.log("Kolla vad dokumentet är för något:", doc);
-			// TODO: return doc.?? + doc.??
-			return 0;
-		},
+		totalTimeMin: (doc) =>
+			Number(doc.prepTimeMin || 0) + Number(doc.cookTimeMin || 0),
 	},
 };

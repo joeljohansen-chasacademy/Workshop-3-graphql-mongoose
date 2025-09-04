@@ -4,8 +4,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./db.js";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
-import { typeDefs } from "./schema/typedefs.js";
-import { resolvers } from "./schema/resolvers.js";
+import { typeDefs } from "./graphql/typeDefs.js";
+import { resolvers } from "./graphql/resolvers.js";
 
 dotenv.config();
 
