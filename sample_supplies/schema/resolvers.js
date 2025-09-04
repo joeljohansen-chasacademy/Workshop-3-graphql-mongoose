@@ -6,16 +6,16 @@ export const resolvers = {
 		// sales(storeLocation, limit)
 		sales: async (_p, { storeLocation, limit }) => {
 			const filter = {};
-            //Lägg till i filtret om storeLocation finns, hämta sedan data med .find
-            //Begränsa med .limit om limit finns
-            //Se om ni kan lägga in en sort på saleDate
+			//Lägg till i filtret om storeLocation finns, hämta sedan data med .find
+			//Begränsa med .limit om limit finns
+			//Se om ni kan lägga in en sort på saleDate
 			return query;
 		},
 
 		// sale(id)
 		sale: async (_p, { id }) => {
-			//Kolla att det är ett valid mongoose object
-            //Hämta en sale med id
+			//Kolla att det är ett valid mongoose object id
+			//Hämta en sale med id
 		},
 
 		// totalAmountPerLocation(storeLocation)

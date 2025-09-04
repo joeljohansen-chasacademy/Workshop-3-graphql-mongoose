@@ -32,7 +32,7 @@ export const typeDefs = /* GraphQL */ `
 
 		movie(id: ID!): Movie
 
-		# Räkna ut oppfilmer för ett år
+		# Räkna ut toppfilmer för ett år
 		topRatedPerYear(
 			year: Int!
 			minVotes: Int = 1000
