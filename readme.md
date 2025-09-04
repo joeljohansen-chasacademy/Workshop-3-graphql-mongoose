@@ -187,9 +187,8 @@ connectDB()
 
 **Aggregationer, pipelines, $lookup**
 
-För att lösa vissa uppgifterna kan det vara lämpligt att använda aggregationer.
+För att lösa vissa uppgifterna kan det vara lämpligt att använda aggregationer. Se länkar nedan för mer info.
 
-**Se länkar nedan för mer info.**
 [Om MongoDB Aggregations](https://www.mongodb.com/docs/manual/aggregation/)
 [Aggregation in mongoose](https://article.arunangshudas.com/what-is-the-mongodb-aggregation-pipeline-in-mongoose-308a05c15e7e)
 [Mer aggregation i mongoose](https://www.geeksforgeeks.org/mongodb/mongoose-aggregate-aggregate-api/)
